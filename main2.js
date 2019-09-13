@@ -3,7 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const {/*vet,*/ pet, user, date} = require("./vetSchemas");
 
-const PORT = 2000;
+const PORT = 3000;
 
 const app = express();
 
