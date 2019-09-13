@@ -1,12 +1,14 @@
 // esquema prod y un esquema ticket
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors"); //CON ESTO NUESTRA API PUEDE SERVIR A OTROS LADOS
 const {/*vet,*/ pet, user, date} = require("./vetSchemas");
 
-const PORT = 3000;
+const PORT = process.env.PORT || 2000; //DECLARAMOS EL PUERTO QUE SE ESTARÁ USANDO PARA EL LOCALHOST
 
 const app = express();
 
+app.use(cors()); //INICIALIZAMOS CORS
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
