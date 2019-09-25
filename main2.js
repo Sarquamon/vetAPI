@@ -1,4 +1,3 @@
-// esquema prod y un esquema ticket
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors"); //CON ESTO NUESTRA API PUEDE SERVIR A OTROS LADOS
