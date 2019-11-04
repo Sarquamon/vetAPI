@@ -20,6 +20,15 @@ const userSchema = new Schema(
     firstName: String,
     surName: String,
     address: String,
+    productBought: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          default: "",
+          ref: "product"
+        }
+      ]
+    },
     pets: {
       type: [
         {
@@ -79,6 +88,35 @@ const dateSchema = new Schema(
   {timestamps: true}
 );
 
+const productSchema = new Schema(
+  {
+    productName: String,
+    productPrice: String,
+    productDesc: String
+  },
+  {timestamps: true}
+);
+
+const purchaseSchema = new Schema(
+  {
+    madeBy: {
+      type: mongoose.Types.ObjectId,
+      ref: "user"
+    },
+    productBought: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          default: "",
+          quantity: mongoose.Schema.Types.Number,
+          ref: "product"
+        }
+      ]
+    }
+  },
+  {timestamps: true}
+);
+
 // const vetSchema = new Schema(
 //   {
 //     vetUserName: String,
@@ -97,6 +135,8 @@ const dateSchema = new Schema(
 
 const user = mongoose.model("user", userSchema);
 const pet = mongoose.model("pet", petSchema);
+const product = mongoose.model("product", productSchema);
+const purchase = mongoose.model("purchase", purchaseSchema);
 // const vet = mongoose.model("vet", vetSchema);
 const date = mongoose.model("date", dateSchema);
 
@@ -104,5 +144,7 @@ module.exports = {
   user,
   pet,
   // vet,
-  date
+  date,
+  product,
+  purchase
 };

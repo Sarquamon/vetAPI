@@ -1,8 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors"); //CON ESTO NUESTRA API PUEDE SERVIR A OTROS LADOS
-const {/*vet,*/ pet, user, date} = require("./vetSchemas");
-
+const {/*vet,*/ pet, user, date, product, purchase} = require("./vetSchemas");
 const PORT = process.env.PORT || 2000; //DECLARAMOS EL PUERTO QUE SE ESTARÁ USANDO PARA EL LOCALHOST
 
 const app = express();
@@ -49,6 +48,7 @@ app.post("/create/user/", (req, res) => {
 app.get("/all/user/", (req, res) => {
   user
     .find()
+    .populate("product")
     .populate("pets")
     .exec()
     .then(result => res.status(200).send(result))
@@ -56,17 +56,29 @@ app.get("/all/user/", (req, res) => {
 });
 
 // Get user by email
-app.get("/user/:userEmail/", (req, res) => {
+app.get("/user/email/:userEmail/", (req, res) => {
   const {userEmail} = req.body;
 
   user
     .findOne(userEmail)
+    .populate("product")
     .populate("pets")
     .exec()
     .then(result => res.status(200).send(result))
     .catch(err => res.status(209).send(err));
 });
+//get user by id
+app.get("/user/id/:id/", (req, res) => {
+  const {id} = req.params;
 
+  user
+    .findById(id)
+    .populate("product")
+    .populate("pets")
+    .exec()
+    .then(result => console.log(`Exito! ${result}`))
+    .catch(err => console.log(err));
+});
 // //Vets
 // //Create vets
 // app.post("/create/vet/", (req, res) => {
@@ -231,6 +243,59 @@ app.get("/all/date/", (req, res) => {
     .then(result => res.status(200).send(result))
     .catch(err => res.status(409).send(err));
 });
+
+//products
+//create product
+app.post("/create/product/", (req, res) => {
+  const {productName, productPrice, productDesc} = req.body;
+
+  const newProduct = product({
+    productName,
+    productPrice,
+    productDesc
+  });
+
+  newProduct.save((err, product) => {
+    !err ? res.status(201).send(product) : res.status(400).send(err);
+  });
+});
+
+//get product by id
+app.get("/product/id/:id/", (req, res) => {
+  const {id} = req.params;
+
+  product
+    .findById(id)
+    .populate("user")
+    .exec()
+    .then(result => console.log(`Exito! ${result}`))
+    .catch(err => console.log(err));
+});
+
+//get product by name
+app.get("/product/name/:productName/", (req, res) => {
+  const {productName} = req.body;
+
+  product
+    .findOne(productName)
+    .populate("user")
+    .exec()
+    .then(result => res.status(200).send(result))
+    .catch(err => res.status(209).send(err));
+});
+//get all products
+app.get("/all/product/", (req, res) => {
+  product
+    .find()
+    .exec()
+    .then(result => res.status(200).send(result))
+    .catch(err => res.status(409).send(err));
+});
+
+//Shop
+// app.post("/create/purchase/", (req, res) =>{
+//   const
+// })
 
 app.listen(PORT, () => {
   console.log(`Server iniciado en: ${PORT}`);
