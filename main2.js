@@ -277,7 +277,7 @@ app.get("/product/name/:productName/", (req, res) => {
   const {productName} = req.body;
 
   product
-    .findOne(productName)
+    .find(productName)
     .populate("user")
     .exec()
     .then(result => res.status(200).send(result))
