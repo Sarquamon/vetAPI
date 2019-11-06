@@ -90,11 +90,36 @@ const dateSchema = new Schema(
 
 const productSchema = new Schema(
   {
-    productName: String,
-    productPrice: String,
-    productDesc: String
+    productName: {
+      type: String,
+      required: true,
+      minlength: 3
+    },
+    productDesc: {
+      type: String,
+      minlength: 5
+    },
+    productPrice: {
+      type: Number,
+      required: true,
+      min: 5,
+      default: 5
+    }
   },
   {timestamps: true}
+);
+
+productSchema.index(
+  {
+    productName: "text",
+    productDesc: "text"
+  },
+  {
+    weights: {
+      productName: 5,
+      productDesc: 1
+    }
+  }
 );
 
 const purchaseSchema = new Schema(

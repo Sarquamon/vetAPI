@@ -261,23 +261,24 @@ app.post("/create/product/", (req, res) => {
 });
 
 //get product by id
-app.get("/product/id/:id/", (req, res) => {
-  const {id} = req.params;
+// app.get("/product/id/:id/", (req, res) => {
+//   const {id} = req.params;
 
-  product
-    .findById(id)
-    .populate("user")
-    .exec()
-    .then(result => console.log(`Exito! ${result}`))
-    .catch(err => console.log(err));
-});
+//   product
+//     .findById(id)
+//     .populate("user")
+//     .exec()
+//     .then(result => console.log(`Exito! ${result}`))
+//     .catch(err => console.log(err));
+// });
 
 //get product by name
 app.get("/product/name/:productName/", (req, res) => {
-  const {productName} = req.body;
+  const {productName} = req.params;
 
   product
-    .find(productName)
+    .find({$text: {$search: productName}})
+    .limit(10)
     .populate("user")
     .exec()
     .then(result => res.status(200).send(result))
