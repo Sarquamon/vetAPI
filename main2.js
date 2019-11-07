@@ -1,14 +1,43 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors"); //CON ESTO NUESTRA API PUEDE SERVIR A OTROS LADOS
+const multer = require("multer");
+
 const {/*vet,*/ pet, user, date, product, purchase} = require("./vetSchemas");
 const PORT = process.env.PORT || 2000; //DECLARAMOS EL PUERTO QUE SE ESTARÁ USANDO PARA EL LOCALHOST
 
 const app = express();
 
 app.use(cors()); //INICIALIZAMOS CORS
+app.use("/uploads/", express.static("uploads"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, "./uploads/");
+  },
+
+  filename: function(req, file, cb) {
+    cb(null, new Date().toISOString() + file.originalname);
+  }
+});
+
+const fileFilter = (req, file, callback) => {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    callback(null, true);
+  } else {
+    callback(new Error("Unaccepted file type"), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 7
+  },
+  fileFilter: fileFilter
+});
 
 app.get("/", (req, res) => {
   res.send("<h1>Hola!</h1>");
@@ -246,13 +275,18 @@ app.get("/all/date/", (req, res) => {
 
 //products
 //create product
-app.post("/create/product/", (req, res) => {
+app.post("/create/product/", upload.single("productImage"), (req, res) => {
+  console.log(req.file);
+  const productImage = req.file.path;
   const {productName, productPrice, productDesc} = req.body;
+
+  console.log(`resultado: ${productImage}`);
 
   const newProduct = product({
     productName,
     productPrice,
-    productDesc
+    productDesc,
+    productImage
   });
 
   newProduct.save((err, product) => {

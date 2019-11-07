@@ -104,6 +104,10 @@ const productSchema = new Schema(
       required: true,
       min: 5,
       default: 5
+    },
+    productImage: {
+      type: String,
+      required: true
     }
   },
   {timestamps: true}
