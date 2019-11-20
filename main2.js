@@ -15,7 +15,8 @@ app.use(bodyParser.json());
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, "./uploads/");
+    cb(null, "../../../../mineriaapp/src/img/");
+    //cb(null, "..  /uploads2/");
   },
 
   filename: function(req, file, cb) {
@@ -280,7 +281,7 @@ app.post("/create/product/", upload.single("productImage"), (req, res) => {
   const productImage = req.file.path;
   const {productName, productPrice, productDesc} = req.body;
 
-  console.log(`resultado: ${productImage}`);
+  //console.log(`resultado: ${productImage}`);
 
   const newProduct = product({
     productName,
@@ -295,16 +296,17 @@ app.post("/create/product/", upload.single("productImage"), (req, res) => {
 });
 
 //get product by id
-// app.get("/product/id/:id/", (req, res) => {
-//   const {id} = req.params;
+app.get("/product/id/:id/", (req, res) => {
+  const {id} = req.params;
 
-//   product
-//     .findById(id)
-//     .populate("user")
-//     .exec()
-//     .then(result => console.log(`Exito! ${result}`))
-//     .catch(err => console.log(err));
-// });
+  product
+    .findById(id)
+    .limit(10)
+    .populate("user")
+    .exec()
+    .then(result => console.log(`Exito! ${result}`))
+    .catch(err => console.log(err));
+});
 
 //get product by name
 app.get("/product/name/:productName/", (req, res) => {
