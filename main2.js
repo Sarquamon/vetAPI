@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 2000; //DECLARAMOS EL PUERTO QUE SE ESTARÁ USA
 const app = express();
 
 app.use(cors()); //INICIALIZAMOS CORS
-app.use("/uploads/", express.static("uploads"));
+app.use("/../../../../mineriaapp/src/img", express.static("img")); //HACE UN FOLDER PUBLICO
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
