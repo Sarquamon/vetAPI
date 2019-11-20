@@ -304,8 +304,14 @@ app.get("/product/id/:id/", (req, res) => {
     .limit(10)
     .populate("user")
     .exec()
-    .then(result => console.log(`Exito! ${result}`))
-    .catch(err => console.log(err));
+    .then(result => {
+      res.status(200).send(result);
+      console.log(`Exito! ${result}`);
+    })
+    .catch(err => {
+      res.status(209).send(err);
+      console.log(err);
+    });
 });
 
 //get product by name
