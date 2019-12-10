@@ -14,100 +14,109 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, "../../../../mineriaapp/src/img/");
-    //cb(null, "..  /uploads2/");
-  },
+	destination: function(req, file, cb) {
+		cb(null, "../../../../mineriaapp/src/img/");
+		//cb(null, "..  /uploads2/");
+	},
 
-  filename: function(req, file, cb) {
-    cb(null, new Date().toISOString() + file.originalname);
-  }
+	filename: function(req, file, cb) {
+		cb(null, new Date().toISOString() + file.originalname);
+	}
 });
 
 const fileFilter = (req, file, callback) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    callback(null, true);
-  } else {
-    callback(new Error("Unaccepted file type"), false);
-  }
+	if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+		callback(null, true);
+	} else {
+		callback(new Error("Unaccepted file type"), false);
+	}
 };
 
 const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 7
-  },
-  fileFilter: fileFilter
+	storage: storage,
+	limits: {
+		fileSize: 1024 * 1024 * 7
+	},
+	fileFilter: fileFilter
 });
 
 app.get("/", (req, res) => {
-  res.send("<h1>Hola!</h1>");
+	res.send("<h1>Hola!</h1>");
 });
 
 //User post, get...
 // Create a new user
 app.post("/create/user/", (req, res) => {
-  const {
-    userEmail,
-    username,
-    userPwd,
-    firstName,
-    surName,
-    address,
-    isVet,
-    activeUser
-  } = req.body;
+	const {
+		userEmail,
+		username,
+		userPwd,
+		firstName,
+		surName,
+		address,
+		isVet,
+		activeUser
+	} = req.body;
 
-  const newUser = user({
-    userEmail,
-    username,
-    userPwd,
-    firstName,
-    surName,
-    address,
-    isVet,
-    activeUser
-  });
+	const newUser = user({
+		userEmail,
+		username,
+		userPwd,
+		firstName,
+		surName,
+		address,
+		isVet,
+		activeUser
+	});
 
-  newUser.save((err, user) => {
-    !err ? res.status(201).send(user) : res.status(400).send(err);
-  });
+	newUser.save((err, user) => {
+		!err ? res.status(201).send(user) : res.status(400).send(err);
+	});
 });
 
 //Get all users
 app.get("/all/user/", (req, res) => {
-  user
-    .find()
-    .populate("product")
-    .populate("pets")
-    .exec()
-    .then(result => res.status(200).send(result))
-    .catch(err => res.status(409).send(err));
+	user
+		.find()
+		.populate("product")
+		.populate("pets")
+		.exec()
+		.then(result => res.status(200).send(result))
+		.catch(err => res.status(409).send(err));
 });
 
 // Get user by email
 app.get("/user/email/:userEmail/", (req, res) => {
-  const {userEmail} = req.body;
+	const {userEmail} = req.params;
 
-  user
-    .findOne(userEmail)
-    .populate("product")
-    .populate("pets")
-    .exec()
-    .then(result => res.status(200).send(result))
-    .catch(err => res.status(209).send(err));
+	console.log(` body: ${req.params}`);
+	console.log(` userEmail: ${userEmail}`);
+
+	user
+		.findOne({userEmail})
+		.populate("product")
+		.populate("pets")
+		.exec()
+		.then(result => res.status(200).send(result))
+		.catch(err => res.status(209).send(err));
 });
 //get user by id
 app.get("/user/id/:id/", (req, res) => {
-  const {id} = req.params;
+	const {id} = req.params;
 
-  user
-    .findById(id)
-    .populate("product")
-    .populate("pets")
-    .exec()
-    .then(result => console.log(`Exito! ${result}`))
-    .catch(err => console.log(err));
+	user
+		.findById(id)
+		.populate("product")
+		.populate("pets")
+		.exec()
+		.then(result => {
+			// console.log(`Exito! ${result}`);
+			res.status(200).send(result);
+		})
+		.catch(err => {
+			// console.log(err);
+			res.status(209).send(err);
+		});
 });
 // //Vets
 // //Create vets
@@ -151,55 +160,55 @@ app.get("/user/id/:id/", (req, res) => {
 //Pets
 //create Pet
 app.post("/create/pet/", (req, res) => {
-  const {userEmail, name, age, race, illnes, treatment} = req.body;
+	const {userEmail, name, age, race, illnes, treatment} = req.body;
 
-  const newPet = pet({
-    name,
-    age,
-    race,
-    illnes,
-    treatment
-  });
+	const newPet = pet({
+		name,
+		age,
+		race,
+		illnes,
+		treatment
+	});
 
-  newPet.save((err, result) => {
-    if (!err) {
-      user.findOneAndUpdate(
-        {userEmail},
-        {$push: {pets: result._id}},
-        {new: true},
-        (err, user) => {
-          if (!err) {
-            res.status(200).send(`Todo good ${user}`);
-          } else {
-            res.status(409).send(`Error! ${err}`);
-          }
-        }
-      );
-    } else {
-      res.status(409).send(`Error! ${err}`);
-    }
-  });
+	newPet.save((err, result) => {
+		if (!err) {
+			user.findOneAndUpdate(
+				{userEmail},
+				{$push: {pets: result._id}},
+				{new: true},
+				(err, user) => {
+					if (!err) {
+						res.status(200).send(`Todo good ${user}`);
+					} else {
+						res.status(409).send(`Error! ${err}`);
+					}
+				}
+			);
+		} else {
+			res.status(409).send(`Error! ${err}`);
+		}
+	});
 });
 
 //Get all pets
 app.get("/all/pet/", (req, res) => {
-  pet
-    .find()
-    .exec()
-    .then(result => res.status(200).send(result))
-    .catch(err => res.status(409).send(err));
+	pet
+		.find()
+		.exec()
+		.then(result => res.status(200).send(result))
+		.catch(err => res.status(409).send(err));
 });
 
 //Get pet by id
 app.get("/pet/:id/", (req, res) => {
-  const {id} = req.params;
+	const {id} = req.params;
 
-  pet
-    .findById(id)
-    .populate("user")
-    .exec()
-    .then(result => console.log(`Exito! ${result}`))
-    .catch(err => console.log(err));
+	pet
+		.findById(id)
+		.populate("user")
+		.exec()
+		.then(result => console.log(`Exito! ${result}`))
+		.catch(err => console.log(err));
 });
 
 //Dates
@@ -221,118 +230,118 @@ app.get("/pet/:id/", (req, res) => {
 
 //Create a new date
 app.post("/create/date/", (req, res) => {
-  // app.get("/all/date/", (request, result) => {
+	// app.get("/all/date/", (request, result) => {
 
-  // })
+	// })
 
-  let {userDate, madeBy, patientPet} = req.body;
+	let {userDate, madeBy, patientPet} = req.body;
 
-  user
-    .findById(madeBy)
-    .exec()
-    .then(result => {
-      console.log(`Exito! ${result._id}`);
-      madeBy = result._id;
-    })
-    .catch(err => {
-      console.log(`Error1: ${err}`);
-      res.status(201).send(`Error: No existe ese usuario ${err}`);
-    });
+	user
+		.findById(madeBy)
+		.exec()
+		.then(result => {
+			console.log(`Exito! ${result._id}`);
+			madeBy = result._id;
+		})
+		.catch(err => {
+			console.log(`Error1: ${err}`);
+			res.status(201).send(`Error: No existe ese usuario ${err}`);
+		});
 
-  pet
-    .findById(patientPet)
-    .exec()
-    .then(result => {
-      console.log(`Exito! ${result._id}`);
-      patientPet = result._id;
-    })
-    .catch(err => {
-      console.log(`Error2: ${err}`);
-      res.status(201).send(`Error: No existe esa mascota ${err}`);
-    });
+	pet
+		.findById(patientPet)
+		.exec()
+		.then(result => {
+			console.log(`Exito! ${result._id}`);
+			patientPet = result._id;
+		})
+		.catch(err => {
+			console.log(`Error2: ${err}`);
+			res.status(201).send(`Error: No existe esa mascota ${err}`);
+		});
 
-  const newDate = date({
-    userDate,
-    madeBy,
-    patientPet
-  });
+	const newDate = date({
+		userDate,
+		madeBy,
+		patientPet
+	});
 
-  newDate.save((err, result) => {
-    !err
-      ? res.status(201).send(`Exito! ${result}`)
-      : res.status(409).send(`Error! ${err}`);
-  });
+	newDate.save((err, result) => {
+		!err
+			? res.status(201).send(`Exito! ${result}`)
+			: res.status(409).send(`Error! ${err}`);
+	});
 });
 
 app.get("/all/date/", (req, res) => {
-  date
-    .find()
-    .populate("madeBy")
-    .populate("patientPet")
-    .exec()
-    .then(result => res.status(200).send(result))
-    .catch(err => res.status(409).send(err));
+	date
+		.find()
+		.populate("madeBy")
+		.populate("patientPet")
+		.exec()
+		.then(result => res.status(200).send(result))
+		.catch(err => res.status(409).send(err));
 });
 
 //products
 //create product
 app.post("/create/product/", upload.single("productImage"), (req, res) => {
-  console.log(req.file);
-  const productImage = req.file.path;
-  const {productName, productPrice, productDesc} = req.body;
+	console.log(req.file);
+	const productImage = req.file.path;
+	const {productName, productPrice, productDesc} = req.body;
 
-  //console.log(`resultado: ${productImage}`);
+	//console.log(`resultado: ${productImage}`);
 
-  const newProduct = product({
-    productName,
-    productPrice,
-    productDesc,
-    productImage
-  });
+	const newProduct = product({
+		productName,
+		productPrice,
+		productDesc,
+		productImage
+	});
 
-  newProduct.save((err, product) => {
-    !err ? res.status(201).send(product) : res.status(400).send(err);
-  });
+	newProduct.save((err, product) => {
+		!err ? res.status(201).send(product) : res.status(400).send(err);
+	});
 });
 
 //get product by id
 app.get("/product/id/:id/", (req, res) => {
-  const {id} = req.params;
+	const {id} = req.params;
 
-  product
-    .findById(id)
-    .limit(10)
-    .populate("user")
-    .exec()
-    .then(result => {
-      res.status(200).send(result);
-      console.log(`Exito! ${result}`);
-    })
-    .catch(err => {
-      res.status(209).send(err);
-      console.log(err);
-    });
+	product
+		.findById(id)
+		.limit(10)
+		.populate("user")
+		.exec()
+		.then(result => {
+			res.status(200).send(result);
+			console.log(`Exito! ${result}`);
+		})
+		.catch(err => {
+			res.status(209).send(err);
+			console.log(err);
+		});
 });
 
 //get product by name
 app.get("/product/name/:productName/", (req, res) => {
-  const {productName} = req.params;
+	const {productName} = req.params;
 
-  product
-    .find({$text: {$search: productName}})
-    .limit(10)
-    .populate("user")
-    .exec()
-    .then(result => res.status(200).send(result))
-    .catch(err => res.status(209).send(err));
+	product
+		.find({$text: {$search: productName}})
+		.limit(10)
+		.populate("user")
+		.exec()
+		.then(result => res.status(200).send(result))
+		.catch(err => res.status(209).send(err));
 });
 //get all products
 app.get("/all/product/", (req, res) => {
-  product
-    .find()
-    .exec()
-    .then(result => res.status(200).send(result))
-    .catch(err => res.status(409).send(err));
+	product
+		.find()
+		.exec()
+		.then(result => res.status(200).send(result))
+		.catch(err => res.status(409).send(err));
 });
 
 //Shop
@@ -341,5 +350,5 @@ app.get("/all/product/", (req, res) => {
 // })
 
 app.listen(PORT, () => {
-  console.log(`Server iniciado en: ${PORT}`);
+	console.log(`Server iniciado en: ${PORT}`);
 });
